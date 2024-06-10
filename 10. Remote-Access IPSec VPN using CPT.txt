@@ -1,0 +1,46 @@
+Router(config)#aaa new-model 
+Router(config)#aaa authentication login abc1 local
+Router(config)#aaa authorization network abc2 local
+Router(config)#username admin password admin
+Router(config)#
+
+Router(config)#crypto isakmp policy 10
+Router(config-isakmp)#encryption 3des
+Router(config-isakmp)#hash md5
+Router(config-isakmp)#authentication pre-share
+Router(config-isakmp)#Group 2
+Router(config-isakmp)#exit
+
+Router(config)#ip local pool vpnpool 192.168.1.1 192.168.1.50
+Router(config)#
+
+Router(config)#crypto isakmp client configuration group cisco
+Router(config-isakmp-group)#key cisco123
+Router(config-isakmp-group)#pool vpnpool
+Router(config-isakmp-group)#
+Router(config-isakmp-group)#exit
+
+Router(config)#crypto ipsec transform-set set1 esp-3des esp-md5-hmac 
+
+Router(config)#crypto dynamic-map map1 10
+Router(config-crypto-map)#set transform-set set1
+Router(config-crypto-map)#reverse-route
+Router(config-crypto-map)#exit
+
+Router(config)#crypto map map1 client configuration address respond
+Router(config)#crypto map map1 client authentication list abc1
+Router(config)#
+Router(config)#crypto map map1 isakmp authorization list abc2
+Router(config)#crypto map map1 10 ipsec-isakmp dynamic map1
+
+Router(config)#int f0/0 (port which connects to the pc)
+Router(config-if)#crypto map map1
+*Jan  3 07:16:26.785: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON
+Router(config-if)#
+Router(config-if)#
+Router#
+%SYS-5-CONFIG_I: Configured from console by console
+
+Router#
+
+show crypto isakmp sa
